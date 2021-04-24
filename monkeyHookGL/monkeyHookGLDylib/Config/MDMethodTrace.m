@@ -562,7 +562,6 @@ typedef NS_ENUM(NSUInteger, MDTraceSource) {
         return;
     }
     
-    MDLog(TRACE_README);
     
     self.config         = [NSMutableDictionary dictionaryWithDictionary:config];
     self.logLevel       = [SAFE_CHECK(self.config[MDCONFIG_LOG_LEVEL_KEY], NSNumber) unsignedIntegerValue];

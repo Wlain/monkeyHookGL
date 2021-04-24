@@ -9,32 +9,73 @@
 //
 
 #import "monkeyHookGLDylib.h"
-#import "commonUtils.h"
+#import "commonUtils.hpp"
 #import "glHook.h"
+#import "fishhook/fishhook.h"
 #import <CaptainHook/CaptainHook.h>
 #import <UIKit/UIKit.h>
 #import <Cycript/Cycript.h>
 #import <MDCycriptManager.h>
+#import <vector>
+#import <GLKit/GLKit.h>
+
+static std::vector<rebinding> s_rebindingArr;
+
+static void hookCGlAPIBegin()
+{
+    s_rebindingArr.clear();
+}
+
+static void hookCGlAPIInsert(const char* name,void *replacement,void **replaced)
+{
+    rebinding rebind;
+    rebind.name = name;
+    rebind.replacement = replacement;
+    rebind.replaced = replaced;
+    s_rebindingArr.push_back(rebind);
+}
+
+static void hookCGlAPIFinish()
+{
+    if (s_rebindingArr.empty())
+    {
+        return;
+    }
+    size_t count = s_rebindingArr.size();
+    rebind_symbols(s_rebindingArr.data(), count);
+}
+
+static void(*glDrawArraysFunc)(GLenum mode, GLint first, GLsizei count);
+static void glDrawArraysNew(GLenum mode, GLint first, GLsizei count)
+{
+    NSLog(@"glDrawArrays called");
+    glClearColor(1, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+//    glDrawArraysFunc(mode, first, count);
+}
+
+void (*glDrawElementsFun)(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices);
+static void glDrawElementsNew(GLenum mode, GLint first, GLsizei count)
+{
+    NSLog(@"glDrawElementsNew called");
+//    glDrawArraysFunc(mode, first, count);
+}
+
+//void glShaderSourceNew(GLuint shader, GLsizei count, const GLchar* const *string, const GLint* length)
+//{
+//    NSLog(@"glShaderSourceNew called");
+//}
+
 
 CHConstructor{
     printf(INSERT_SUCCESS_WELCOME);
     
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
-        
-#ifndef __OPTIMIZE__
-        CYListenServer(6666);
-
-        MDCycriptManager* manager = [MDCycriptManager sharedInstance];
-        [manager loadCycript:NO];
-
-        NSError* error;
-        NSString* result = [manager evaluateCycript:@"UIApp" error:&error];
-        NSLog(@"result: %@", result);
-        if(error.code != 0){
-            NSLog(@"error: %@", error.localizedDescription);
-        }
-#endif
-        
+        hookCGlAPIBegin();
+        hookCGlAPIInsert("glDrawArrays", (void*)&glDrawArraysNew, (void**)&glDrawArraysFunc);
+        hookCGlAPIInsert("glDrawElements", (void*)&glDrawElementsNew, (void**)&glDrawElementsFun);
+//        hookCGlAPIInsert"glShaderSource",(void*)&glShaderSourcenew, (void**)&glShaderSourceFunc);
+        hookCGlAPIFinish();
     }];
 }
 
