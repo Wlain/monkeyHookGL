@@ -9,11 +9,27 @@
 #define glHook_hpp
 
 #include "fishhook/fishhook.h"
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
 #include <vector>
 
 class GLHook
 {
 public:
+    enum class CurrentShaderStatus : int32_t
+    {
+        VertShader,
+        FragShader,
+        OtherShader
+    };
+    
+    struct GLInfo
+    {
+        GLuint vertShader;
+        GLuint fragShader;
+        GLuint program;
+        GLuint framebuffer;
+    };
     GLHook();
     ~GLHook();
     
