@@ -136,7 +136,7 @@ CHConstructor{
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
         GLHook glHook;
         glHook.begin();
-        glHook.insertFunc("glCreateShaderNew", (void*)&glCreateShaderNew, (void**)&s_glCreateShaderFunc);
+        glHook.insertFunc("glCreateShader", (void*)&glCreateShaderNew, (void**)&s_glCreateShaderFunc);
         glHook.insertFunc("glCreateProgram", (void*)&glCreateProgramNew, (void**)&s_glCreateProgramFunc);
         glHook.insertFunc("glDrawArrays", (void*)&glDrawArraysNew, (void**)&s_glDrawArraysFunc);
         glHook.insertFunc("glDrawElements", (void*)&glDrawElementsNew, (void**)&s_glDrawElementsFun);
